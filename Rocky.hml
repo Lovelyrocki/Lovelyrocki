@@ -1,1 +1,134 @@
 
+<!DOCTYPE html>
+<html>
+
+<head>
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title></title>
+  <style>
+    button{
+      height:100px;
+      width:100px;
+      margin-left: 100px;
+      margin-bottom: 100px;
+     background-color:rgba(12,125,125,0.9);
+     border-radius:25%;
+     font-size:20px;
+    }
+    .robo{
+      visibility:hidden;
+      
+      
+    }
+    #play{
+      margin-left:50%;
+      width:65px;
+      height:65px;
+      padding:0px;
+      background-color:orange;
+      border-radius:20%;
+      font-size:3em;
+    }
+    #again{
+      background-color:skyblue;
+    margin-left:50%;
+    width:100px;
+    height:70px;
+    }
+    .res{
+      background-color:rgba(3,69,145,0.9);
+    }
+    .re{
+      visibility:visible;
+    }
+    body{
+      background-color:rgba(0,0,0,0.9);
+    }
+    #result{
+      color:white;
+    }
+    p{
+      color:white;
+      font-size: 30px;
+    }
+  </style>
+  
+</head>
+
+<body>
+  <center><p>User:</p></center>
+<button id="img1"value="1">rock</button>
+<button id="img2"value="2">paper</button>
+<button id="img3"value="3">scissor</button>   
+<br>
+<button id="play">▶️</button>
+<br>
+<center><p>Computer:</p></center>
+<button class="robo"id="img4"value="rock">rock</button>
+<button class="robo"id="img5"value="paper">paper</button>
+<button class="robo"id="img6"value="scissor">scissor</button>
+<span class="result">User:</span>
+<span class="result">Computer</span>
+<button id="again">play again</button>
+<script>
+var user=null;
+result=document.getElementById("result");
+robot=document.getElementsByClassName("robo");
+var rock=document.getElementById("img1");
+rock.addEventListener("click",function(e){
+    user=rock.value;
+  paper.classList.remove("res");
+  scissor.classList.remove("res");
+   rock.classList.add("res");
+  });
+var paper=document.getElementById("img2");
+paper.addEventListener("click", function(e) {
+user=paper.value;
+paper.classList.add("res");
+scissor.classList.remove("res");
+rock.classList.remove("res");
+});
+var scissor=document.getElementById("img3");
+scissor.addEventListener("click", function() {
+user=scissor.value;
+paper.classList.remove("res");
+rock.classList.remove("res");
+scissor.classList.add("res");
+});
+ document.getElementById("play").addEventListener("click",function(){
+   
+   robot[0].classList.remove("re");
+   robot[1].classList.remove("re");
+   robot[2].classList.remove("re");
+  if(user) {
+    robo = Math.floor(Math.random()*3)+1;
+
+console.log(robo);
+if((user==1 && robo==2)||(user==2 && robo==3)||(user==3 && robo==1)){
+robot[robo-1].classList.add("re");
+result.innerText="computer wins";
+      
+      
+    }
+    else{
+      robot[robo-1].classList.add("re");
+      result.innerText="user wins";
+      
+    }
+  }
+  });
+  document.getElementById("again").addEventListener("click",function(){
+    rock.classList.remove("res");
+    paper.classList.remove("res");
+    scissor.classList.remove("res");
+    
+   robot[0].classList.remove("re");
+   robot[1].classList.remove("re");
+   robot[2].classList.remove("re");
+   
+  })
+</script>
+</body>
+
+</html>
