@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Chatbot</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #chatbox { width: 300px; height: 400px; border: 1px solid #ccc; padding: 10px; overflow-y: scroll; }
+        #userInput { width: calc(100% - 22px); padding: 10px; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.6.4/math.min.js"></script>
+</head>
+<body>
+
+<div id="chatbox"><div>Chatbot: Hello! Type 'bye' to exit.</div></div>
+<input type="text" id="userInput" placeholder="Type a message...">
+
+<script>
+    const inputs = [
+        ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening', 'good night'],
+        ['how are you', 'are you fine', 'what\'s up', 'what\'s going on', 'how are you', 'how\'s it going', 'how have you been', 'how are you doing', 'how\'s everything', 'how\'s life', 'how are things', 'how\'s your day going', 'how\'s your week been', 'how do you feel'],
+        ['fine','yeah excellent','great','wonderful','good','nice','pretty good','definitely good','i am good','i am fine'],
+        ['nothing','i don\'t need anything','i need nothing']
+    ];
+    const replies = [
+        ['hi!', 'hello', 'hey!', 'Good morning', 'Good evening', 'Good night. Have a good night'],
+        ['I am fine, what about you', 'Yeah, I am good and what about you', 'I\'ve been great. How about you?', 'Pretty good. How are you?', 'Everything\'s good. You?', 'It\'s been great. How about yours?', 'It\'s going well. How\'s yours?', 'It\'s been good. Yours?', 'I\'m feeling well. How about you?'],
+        ['That is great. How can I help you','That is great. How can I help you','That is great. How can I help you','That is great. How can I help you','That is great. How can I help you','That is great. How can I help you','That is great. How can I help you','That is great. How can I help you'],
+        ["That is great, feel free to ask, have a good day","Cool, feel free to ask, have a nice day","Excellent, feel free to ask, have an excellent day"]
+    ];
+    const regex = [/this is (\w+)/i, /(\w+) is my name/i, /my name is (\w+)/i, /i am (\w+)/i];
+    const regex1 = [
+        [/fuck/i, /hack/i, /bitch/i, /whore/i, /sex/i,/ want you/i], 
+        [/your name/i, /who are you/i, /how can I call you/i],
+        [/ask me anything/i,/ask something to me/i,/Talk with me/i,/chat with me/i],
+        [/i want to ask something/i,/ ask something to you/i,/ talk with you/i,/ chat with you/i,/spend some time with you/i]
+    ];
+    const regexresponse = ["I am here to provide useful information, not to encourage you with that type of information. The information that has been provided by you is violating.", "I am chatbot, you can call me RB bot","yeah ,how are you?","Yeah ,feel free to ask me anything"];
+    const url = "https://v2.jokeapi.dev/joke/Any?blacklistFlags=nsfw,religious,political,racist,sexist,explicit&type=single";
+    const url1 = "https://api.quotable.io/random";
+    const dict={};
+    
+    const joke1 = /joke/i;
+    const quote = /quote/i;
+    const tr = /train (\w+)/i;
+    const mean = [/meaning of (\w+)/i, /definition of (\w+)/i, /what do you mean by (\w+)/i];
+
+    const userInput = document.getElementById('userInput');
+    const chatbox = document.getElementById('chatbox');
+    let previousInput = "";
+
+    userInput.addEventListener('keypress', async function(event) {
+        if (event.key === 'Enter') {
+            let userMessage = userInput.value;
+            userMessage = userMessage.toLowerCase();
+            displayMessage(userMessage, 'You');
+            const response = await getResponse(userMessage, previousInput); // Await the response
+            if (response === "Im sorry, I didn't understand that. I am just a rule-based chatbot and I am not a fully advanced AI chatbot."){
+              
+            
+                displayMessage("I don't know the reply, please train me for that answer and use the id call train at beginning", 'Chatbot');
+            } else {
+                displayMessage(response, 'Chatbot');
+            }
+            userInput.value = '';
+            previousInput = userMessage;
+        }
+    });
+
+    function displayMessage(message, sender) {
+        const messageElement = document.createElement('div');
+        messageElement.textContent = sender + ': ' + message;
+        chatbox.appendChild(messageElement);
+        chatbox.scrollTop = chatbox.scrollHeight;
+    }
+
+    async function getResponse(input, previousInput) {
+        let response = '';
+
+        // Split the input by commas to handle multiple parts
+        const parts = input.split(',').map(part => part.trim());
+
+        for (let part of parts) {
+            const nameMatch = part.match(tr);
+            if (nameMatch) {
+                const key = previousInput;
+                const values = input.split("train");
+                const value = values[1].trim();
+                if(key){
+                dict[key]=value;
+                response += `Training completed with key: ${key} and value: ${value}. `;
+                }
+                continue;
+            }
+
+            // Check for the "my name is" pattern
+            for (let m = 0; m < regex.length; m++) {
+                const nameMatch = part.match(regex[m]);
+                if (nameMatch) {
+                    const name = nameMatch[1];
+                    response += `Nice to meet you, ${name}! How can I assist you today? `;
+                    break; // Exit the loop once a match is found
+                }
+            }
+
+            // Check for regex1 patterns
+            for (let m = 0; m < regex1.length; m++) {
+                for (let j = 0; j < regex1[m].length; j++) {
+                    if (regex1[m][j].test(part)) {
+                        response += regexresponse[m] + ' ';
+                        break;
+                    }
+                }
+            }
+
+            // Evaluate mathematical expressions
+            try {
+                const result = math.evaluate(part);
+                if (!isNaN(result)) {
+                    response += `The result is ${result}. `;
+                    continue;
+                }
+            } catch (error) {
+                // Ignore if the part is not a valid expression
+            }
+
+            // Check for joke request
+            if (joke1.test(part)) {
+                response += await getJoke();
+                continue;
+            }
+
+            // Check for quote request
+            if (quote.test(part)) {
+                response += await getQuote();
+                continue;
+            }
+
+            // Check for meaning request
+            for (let m = 0; m < mean.length; m++) {
+                const meaningMatch = part.match(mean[m]);
+                if (meaningMatch) {
+                    const word = meaningMatch[1];
+                    response += await getDefinition(word) + ' ';
+                    break;
+                }
+            }
+
+            // Check for other patterns
+            for (let i = 0; i < inputs.length; i++) {
+                for (let j = 0; j < inputs[i].length; j++) {
+                    if (part === inputs[i][j]) {
+                        response += replies[i][j] + ' ';
+                        break;
+                    }
+                }
+            }
+        }
+
+        return response.trim() || "I'm sorry, I didn't understand that. I am just a rule-based chatbot and I am not a fully advanced AI chatbot.";
+    }
+
+    async function getJoke() {
+        const data = await fetch(url);
+        const resp = await data.json();
+        return resp.joke;
+    }
+
+    async function getQuote() {
+        const data = await fetch(url1);
+        const resp = await data.json();
+        return resp.content;
+    }
+
+    async function getDefinition(word) {
+        const url = `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`;
+        try {
+            const res = await fetch(url);
+            const data = await res.json();
+            return data[0].meanings[0].definitions[0].definition;
+        } catch (error) {
+            return `Sorry, I don't know the definition of ${word}.`;
+        }
+    }
+
+    function insert(key, value) {
+        const dict = {
+            k: key,
+            v: value
+        };
+        fetch('dt.php', {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json'
+            },
+            body: JSON.stringify(dict)
+        }).then(response => response.json())
+        .then(result => {
+            console.log('success', result);
+        })
+    }
+    </script>
+    </body>
+    </html>
